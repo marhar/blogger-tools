@@ -22,6 +22,7 @@ specific steps:
 - ./digest blog-01-10-2013.xml
 - ./gen
 - cleanup:  rm *.html blog.db blog.xml
+- I use make for this... there's a sample Makefile you can customize.
 
 todo:
 - automate download, upload steps
