@@ -1,0 +1,142 @@
+#!/usr/bin/python
+#-----------------------------------------------------------------------
+# Generator for several types of documents
+#-----------------------------------------------------------------------
+
+import sys
+import sqlite3
+
+def heading(s,ofd):
+    print >>ofd,'<h3>%s</h3>'%(s)
+
+#-----------------------------------------------------------------------
+def gen_untagged(curs,ofd=sys.stdout):
+    """generate a list of untagged posts"""
+    heading('Untagged Posts',ofd)
+    curs.execute('select href,title from posts order by seq')
+    curs.execute('select href,title from posts where id not in (select postid from labels)')
+    for rr in curs:
+        print >>ofd,'<a href="%s">%s</a><br/>'%rr
+
+#-----------------------------------------------------------------------
+def gen_allposts_nolabels(curs,ofd=sys.stdout):
+    """generate a master index of all posts"""
+    heading('All Posts on EastBay RC',ofd)
+    curs.execute('select href,title from posts order by seq')
+    for rr in curs:
+        print >>ofd,'<a href="%s">%s</a><br/>'%rr
+
+#-----------------------------------------------------------------------
+def gen_allposts(curs,ofd=sys.stdout):
+    """generate a master index of all posts"""
+    heading('All Posts on EastBay RC',ofd)
+    curs.execute('select href,title,id from posts order by seq')
+    rr=curs.fetchall()
+    for r in rr:
+        print >>ofd,'<a href="%s">%s</a>'%(r[0],r[1]),
+        #curs.execute('select term from labels where postid=? order by term',r[2])
+        curs.execute("select term from labels where postid='%s' order by term"%(r[2]))
+        labs=[a[0] for a in curs.fetchall()]
+        labs=sorted(labs)
+        print >>ofd,'(%s)'%(', '.join(labs))
+
+#-----------------------------------------------------------------------
+def gen_toc(curs,ofd=sys.stdout):
+    """generate a table of contents based on _toc: tags"""
+
+    curs.execute("select distinct term from labels where term like '_toc:%' order by term")
+    terms=[a[0] for a in curs.fetchall()]
+
+    heading('Categorized Table of Contents',ofd)
+    print >>ofd,'<DL>'
+    for term in terms:
+        t2=term[5:]  # chop "_toc:"
+        print >>ofd,'<DT><STRONG><a href="#%s" name="%s">%s</a></STRONG></DT>'%(t2,t2,t2)
+
+        curs.execute("""select href,title
+                        from posts
+                        where id in (
+                          select postid from labels where term=?)
+                        order by seq desc""",(term,))
+        for rr in curs:
+            print >>ofd,'<DD><A HREF="%s">%s</A><BR/></DD>'%rr
+        
+    print >>ofd,'</DL>'
+
+#-----------------------------------------------------------------------
+def gen_toc2(curs,ofd=sys.stdout):
+    """generate a master index of all tags"""
+
+    heading('All Posts on EastBay RC',ofd)
+    print >>ofd,'<DL>'
+
+    curs.execute("""select distinct substr(published,1,7)
+                    from posts order by published""")
+    dates=[a[0] for a in curs]
+
+    for date in dates:
+        print >>ofd,'<DT><STRONG>%s</STRONG></DT>'%(date)
+        print >>ofd,'<DD>'
+
+        curs.execute("""select href,title from posts
+                        where published like ? order by seq desc""",(date+'%',))
+        for rr in curs:
+            print >>ofd,'<a href="%s">%s</a><br/>'%rr
+        print >>ofd,'</DD>'
+    print >>ofd,'</DL>'
+
+#-----------------------------------------------------------------------
+def gen_fullidx(curs,ofd=sys.stdout):
+    """generate a master index of all tags"""
+
+    curs.execute('select distinct term from labels order by term')
+    terms=[a[0] for a in curs.fetchall()]
+
+    heading('Master Index of All Tags',ofd)
+    print >>ofd,'<DL>'
+    for term in terms:
+        print >>ofd,'<DT><STRONG>%s</STRONG></DT>'%(term)
+
+
+        curs.execute("""select href,title
+                        from posts
+                        where id in (
+                          select postid from labels where term=?)
+                        order by seq""",(term,))
+        for rr in curs:
+            print >>ofd,'<DD><A HREF="%s">%s</A><BR/></DD>'%rr
+        
+
+    print >>ofd,'</DL>'
+
+gens={
+'fullidx': gen_fullidx,
+'allposts': gen_allposts,
+'toc': gen_toc,
+'untagged': gen_untagged,
+'toc2': gen_toc2,
+}
+
+#-----------------------------------------------------------------------
+# tool gen idx
+# tool fetch
+# tool put
+#-----------------------------------------------------------------------
+
+def main():
+    """the main thing"""
+
+    conn=sqlite3.connect('blog.db')
+    curs=conn.cursor()
+
+    #cmd=sys.argv[1]
+    #gens[cmd](curs)
+
+    for i in gens.keys():
+        print i
+        fd=open(i+'.html','w')
+        gens[i](curs,fd)
+        fd.close()
+
+#-----------------------------------------------------------------------
+main()

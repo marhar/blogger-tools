@@ -1,0 +1,180 @@
+#!/usr/bin/python
+#-----------------------------------------------------------------------
+#
+# This is an indexer for blogspot blogs.
+#
+#-----------------------------------------------------------------------
+#
+# https://code.google.com/apis/console
+#
+# important pieces of xml context:
+# <entry>
+#     <id>tag:blogger.com,1999:blog-3426582.post-64158207</id>
+#     <id>tag:blogger.com,1999:blog-3426582.page-59980940</id>
+#     <published>2012-04-29T00:23:00.000-07:00</published>
+#     <updated>2012-08-04T15:22:10.900-07:00</updated>
+#     <category scheme="http://www.blogger.com/atom/ns#" term="toc:3dr-radio"/>
+#     <title type="text">Strain Relief Carrier for 3DR Ground Module</title>
+#     <category scheme="http://schemas.google.com/g/2005#kind"
+#                 term="http://schemas.google.com/blogger/2008/kind#post"/>
+#     <category scheme="http://www.blogger.com/atom/ns#" term="toc:3dr-radio"/>
+#     <link rel="alternate" type="text/html"
+#           href="http://eastbay-rc.blogspot.com/2012/04/blah.html"
+#           title="Strain Relief Carrier for 3DR Ground Module"/>
+# </entry>
+##
+# draft
+# page
+#-----------------------------------------------------------------------
+
+import sys
+import os
+import collections
+import sqlite3
+from xml.dom.minidom import parseString
+
+#-----------------------------------------------------------------------
+def get_href(elist):
+    """get the canonical external url for this entry"""
+    alink='--NadaLink--'
+    for e in elist:
+        if e.hasAttribute('rel') and \
+           e.attributes['rel'].nodeValue == 'alternate':
+            alink=e.attributes['href'].nodeValue
+    return alink
+
+#-----------------------------------------------------------------------
+def prep_db(conn):
+    """prepare the database"""
+    curs=conn.cursor()
+    curs.execute("""create table posts (
+                      seq integer,
+                      id text primary key,
+                      title text,
+                      href text,
+                      published text,
+                      updated text)
+                 """)
+    curs.execute("""create table labels (
+                      term text,
+                      seq integer,
+                      postid text,
+                      foreign key(postid) references posts(id));
+
+                 """)
+    conn.commit()
+
+#-----------------------------------------------------------------------
+def do_entry(conn,entry,entry_seq):
+    """process one entry"""
+
+    n_id         = entry.getElementsByTagName('id')[0]
+    n_title      = entry.getElementsByTagName('title')[0]
+    n_published  = entry.getElementsByTagName('published')[0]
+    n_updated    = entry.getElementsByTagName('updated')[0]
+    n_links      = entry.getElementsByTagName('link')
+    n_app_draft  = entry.getElementsByTagName('app:draft')
+    n_categories = entry.getElementsByTagName('category')
+
+    # don't process draft entries (may want to extract all drafts later)
+    if n_app_draft:
+        return
+
+    # handle non-titled posts?
+    t_title = n_title.firstChild.data if n_title and n_title.firstChild else None
+    #t_title     = n_title.firstChild.data     if n_title     else None
+
+    t_id        = n_id.firstChild.data        if n_id        else None
+    t_published = n_published.firstChild.data if n_published else None
+    t_updated   = n_updated.firstChild.data   if n_updated   else None
+
+
+    # unbodge this
+    t_href=get_href(n_links)
+
+    ispost=False
+    l_terms=[]
+    for c in n_categories:
+        if c.hasAttribute('scheme') and c.hasAttribute('term'):
+            scheme_v=c.attributes['scheme'].nodeValue
+            term_v=c.attributes['term'].nodeValue
+
+            if scheme_v.endswith('#kind') and term_v.endswith('#post'):
+                ispost=True
+
+            if scheme_v.endswith('/ns#'):
+                l_terms.append(term_v)
+
+    # don't process non-posts for now
+    if ispost == False:
+        return
+
+    verbose=False
+    if verbose:
+        print '-----'
+        print t_id
+        print t_title
+        print t_href
+        print t_published
+        print t_updated
+        print l_terms
+
+    curs=conn.cursor()
+    curs.execute("""insert into posts(seq,id,title,href,published,updated)
+                            values(?,?,?,?,?,?)""",
+                            (entry_seq,t_id,t_title,t_href,t_published,t_updated))
+
+    term_seq=0
+    for term in l_terms:
+        term_seq += 1
+        if verbose:
+            print '    ',term_seq,term
+        curs.execute("""insert into labels(term,seq,postid)
+                            values(?,?,?)""",
+                            (term, term_seq, t_id))
+
+def PP(s):
+    sys.stdout.write("\r%s\033[K"%(s))
+    sys.stdout.flush()
+
+def P(s):
+    sys.stdout.write("%s\n"%(s))
+    sys.stdout.flush()
+
+#-----------------------------------------------------------------------
+def do_entries(conn,dom):
+    """process all the entries"""
+    entries = dom.getElementsByTagName('entry')
+    seq=0
+    for entry in entries:
+        seq += 1
+        PP("processing item: %d"%seq)
+        do_entry(conn,entry,seq)
+        conn.commit()
+
+#-----------------------------------------------------------------------
+def main():
+    """the main thing"""
+
+    fn=sys.argv[1]
+    ifd=open(fn)
+    data=ifd.read()
+    dom = parseString(data)
+
+    try:
+        os.unlink('blog.db')
+    except: pass
+    conn=sqlite3.connect('blog.db')
+    prep_db(conn)
+    do_entries(conn,dom)
+    P('')
+    curs=conn.cursor()
+    curs.execute('select count(*) from posts')
+    n=curs.fetchone()
+    P('posts: %d'%n)
+    curs.execute('select count(*) from labels')
+    n=curs.fetchone()
+    P('labels: %d'%n)
+
+#-----------------------------------------------------------------------
+main()
