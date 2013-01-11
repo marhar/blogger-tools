@@ -1,0 +1,26 @@
+#!/bin/sh
+
+#-----------------------------------------------------------------------
+# .blogixrc sets 3 items: feed id, gmail logon, and password
+# it looks lke this:
+#    FEED=12312312312312312  # feed/blog id
+#    GMAIL=mymail@gmail.com
+#    echo google passwd: 
+#    stty -echo
+#    read GPASS
+#    stty echo
+#-----------------------------------------------------------------------
+
+. $HOME/.blogixrc
+
+AUTH=`curl 2>/dev/null https://www.google.com/accounts/ClientLogin \
+    -d Email=$GMAIL \
+    -d Passwd=$GPASS  \
+    -d accountType=GOOGLE \
+    -d source=blogix \
+    -d service=blogger \
+  | grep '^Auth=' | cut -c 6-`
+
+curl >blog.xml \
+    -H "Authorization: GoogleLogin auth=$AUTH" \
+    http://www.blogger.com/feeds/$FEED/archive
