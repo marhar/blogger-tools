@@ -24,6 +24,19 @@ specific steps:
 - cleanup:  rm *.html blog.db blog.xml
 - I use make for this... there's a sample Makefile you can customize.
 
+configuration:
+
+$HOME/.blogixrc sets 3 items: feed id, gmail logon, and password.
+Get your feed number from here:
+http://support.google.com/blogger/bin/answer.py?hl=en&answer=42191
+
+    FEED=12312312312312312  
+    GMAIL=mymail@gmail.com
+    echo google passwd:
+    stty -echo
+    read GPASS
+    stty echo
+
 todo:
 - automate upload step
 - use config file to drive generation

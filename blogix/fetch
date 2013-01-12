@@ -2,8 +2,10 @@
 
 #-----------------------------------------------------------------------
 # .blogixrc sets 3 items: feed id, gmail logon, and password
-# it looks lke this:
-#    FEED=12312312312312312  # feed/blog id
+# it looks lke this.  get your feed number from here:
+#    http://support.google.com/blogger/bin/answer.py?hl=en&answer=42191
+#
+#    FEED=12312312312312312
 #    GMAIL=mymail@gmail.com
 #    echo google passwd: 
 #    stty -echo
