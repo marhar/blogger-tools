@@ -42,3 +42,18 @@ todo:
 - use config file to drive generation
 - add sample pages
 - see if there are any other indices that are useful
+
+scad-demos
+----------
+
+Two things here:
+
+- a set of demos for SCAD coding.  Is this really a blogger tool?
+  Maybe it is, it certainly seems a blogworthy topic.
+
+- some code to break apart several scad programs.  An "mscad"
+  file is a series of scad files, separated by lines of 72 hyphens.
+  The program breaks them apart, generates an image for each scad
+  program, and wraps it all in an html table.  It would be nice for
+  it to wrap in a blogger friendly way, then it would be easy to
+  write a tutorial style blog post.
