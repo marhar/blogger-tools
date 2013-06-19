@@ -9,7 +9,13 @@ An html file pulls everything together for easy viewing.
 import sys
 import os
 
-SCAD='/Users/mh/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD'
+SCAD='/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD'
+
+def run(opts):
+    cmd='%s %s'%(SCAD,opts)
+    print cmd
+    sys.stdout.flush()
+    os.system(cmd)
 
 def dofile(fn):
     sep='-'*72+'\n'
@@ -33,13 +39,8 @@ def dofile(fn):
         ofd.write(chunk)
         ofd.close()
 
-        cmd='%s --imgsize=300,300 --camera=100,100,100,0,0,0 -o %s.png %s.scad'%(SCAD,ofpre,ofpre)
-        print cmd
-        os.system(cmd)
-
-        cmd='%s --imgsize=300,300 --camera=100,100,100,0,0,0 -o %s.stl %s.scad'%(SCAD,ofpre,ofpre)
-        print cmd
-        os.system(cmd)
+        run('--imgsize=300,300 --camera=100,100,100,0,0,0 -o %s.png %s.scad'%(ofpre,ofpre))
+        #run('--imgsize=300,300 --camera=100,100,100,0,0,0 -o %s.stl %s.scad'%(ofpre,ofpre))
 
         print >>hfile, '<tr>'
         print >>hfile, '<td>'
