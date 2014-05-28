@@ -1,0 +1,40 @@
+#!/usr/bin/python
+"""
+zipper -- align blogger images in a "zipper" style
+
+In order to zigzag, we need to look for this pattern:
+    'div.separator > a > img'
+
+and perform these transformations:
+  <a> set style, alternate between these lines:
+    style="clear: left;  float: left;  margin-bottom: 1em; margin-right: 1em;"
+    style="clear: right; float: right; margin-bottom: 1em; margin-left: 1em;"
+  <img> set height="150"
+            width="200"
+"""
+
+import sys
+sys.path.append('/Users/mh/Downloads/beautifulsoup4-4.3.2/build/lib')
+from bs4 import BeautifulSoup
+
+html=sys.stdin.read()
+soup = BeautifulSoup(html)
+
+# "0" = start on left
+if len(sys.argv) > 1:
+    dirix=int(sys.argv[1])
+else:
+    dirix=1
+
+dirs=(("left","left","right"),("right","right","left"))
+astyle='clear: %s; float: %s; margin-bottom: 1em; margin-%s: 1em;'
+
+for i in soup.select('div.separator > a > img'):
+   s=astyle%dirs[dirix]
+   dirix=1-dirix
+   i.parent['style']=s
+   i['height']='150'
+   i['width']='200'
+
+#print soup.prettify()
+print soup
