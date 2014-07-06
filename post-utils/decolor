@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# strip out all colors from tags.
+# brute force: doesn't ensure you're in a tag.
+#
+# usage:  decolor [pb]
+#         pb means to use mac pbpaste/pbcopy
+#
+
+if test .pb = .$1; then
+    pbpaste |
+    sed -e 's/background-color:[^;]*;[ ]*//' \
+        -e 's/foreground-color:[^;]*;[ ]*//' \
+        -e 's/color:[^;]*;[ ]*//' |
+    pbcopy
+else
+    sed -e 's/background-color:[^;]*;[ ]*//' \
+        -e 's/foreground-color:[^;]*;[ ]*//' \
+        -e 's/color:[^;]*;[ ]*//'
+fi

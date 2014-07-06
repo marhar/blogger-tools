@@ -1,0 +1,7 @@
+#!/bin/sh
+
+cat <<. | ./decolor
+<span style="background-color: white; font-family: inherit;">foo</span>
+<span style="color: white; font-family: inherit;">bar</span>
+<span style="background-color: #fff; color: white;">baz</span>
+.
