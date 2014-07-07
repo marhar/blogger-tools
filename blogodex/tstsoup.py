@@ -1,5 +1,4 @@
-import sys
-sys.path.append('/Users/mh/Downloads/beautifulsoup4-4.3.2/build/lib')
+#!/usr/bin/python
 from bs4 import BeautifulSoup
 
 

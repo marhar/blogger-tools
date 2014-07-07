@@ -3,6 +3,18 @@ blogger-tools
 
 Tools for interacting with blogger/blogspot
 
+blogger-tools
+-------------
+
+Simple filters, etc for use when typing blog posts
+
+decolor -- sometimes you copy and paste text into a blog that has hard-coded coloring.  this strips it out.  Typical use:
+
+- switch to html view
+- select all text
+- in terminal window: decolor pb
+- paste
+
 blogix -- indexing tools
 ------------------------
 

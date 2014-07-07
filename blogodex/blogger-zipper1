@@ -13,7 +13,6 @@ and perform these transformations:
 """
 
 import sys
-sys.path.append('/Users/mh/Downloads/beautifulsoup4-4.3.2/build/lib')
 from bs4 import BeautifulSoup
 
 before="""
