@@ -1,0 +1,17 @@
+#!/usr/bin/python
+"""
+blogodex -- generate a blog toc and index
+"""
+
+import sys
+from bs4 import BeautifulSoup
+
+blog="blog.xml"
+#blog=sys.argv[1]
+
+xml=open(blog).read()
+xml=unicode(xml,errors='replace')
+
+soup = BeautifulSoup(xml)
+
+print(soup.prettify())
