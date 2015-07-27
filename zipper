@@ -34,7 +34,7 @@ html="""
 <a href="http://3.bp.blogspot.com/-fZRYAy2xR_I/TVrAkNiDkfI/AAAAAAAAAYA/kZwzKUrm6l0/s1600/P1000790.JPG" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://3.bp.blogspot.com/-fZRYAy2xR_I/TVrAkNiDkfI/AAAAAAAAAYA/kZwzKUrm6l0/s320/P1000790.JPG" height="240" width="320" /></a></div>
 """
 
-#html=sys.stdin.read()
+html=sys.stdin.read()
 soup = BeautifulSoup(html)
 
 # "0" = start on left

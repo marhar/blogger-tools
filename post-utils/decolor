@@ -9,12 +9,12 @@
 
 if test .pb = .$1; then
     pbpaste |
-    sed -e 's/background-color:[^;]*;[ ]*//' \
-        -e 's/foreground-color:[^;]*;[ ]*//' \
-        -e 's/color:[^;]*;[ ]*//' |
+    sed -e 's/background-color:[^;]*;[ ]*//g' \
+        -e 's/foreground-color:[^;]*;[ ]*//g' \
+        -e 's/color:[^;]*;[ ]*//g' |
     pbcopy
 else
-    sed -e 's/background-color:[^;]*;[ ]*//' \
-        -e 's/foreground-color:[^;]*;[ ]*//' \
-        -e 's/color:[^;]*;[ ]*//'
+    sed -e 's/background-color:[^;]*;[ ]*//g' \
+        -e 's/foreground-color:[^;]*;[ ]*//g' \
+        -e 's/color:[^;]*;[ ]*//g'
 fi
