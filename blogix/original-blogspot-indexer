@@ -1,0 +1,143 @@
+#!/usr/bin/python
+#-----------------------------------------------------------------------
+#
+# This is an indexer for blogspot blogs.
+#
+#-----------------------------------------------------------------------
+# important pieces of xml context:
+# <entry>
+#     <id>tag:blogger.com,1999:blog-3426582.post-64158207</id>
+#     <id>tag:blogger.com,1999:blog-3426582.page-59980940</id>
+#     <published>2012-04-29T00:23:00.000-07:00</published>
+#     <updated>2012-08-04T15:22:10.900-07:00</updated>
+#     <category scheme="http://www.blogger.com/atom/ns#" term="toc:3dr-radio"/>
+#     <title type="text">Strain Relief Carrier for 3DR Ground Module</title>
+#     <category scheme="http://schemas.google.com/g/2005#kind"
+#                 term="http://schemas.google.com/blogger/2008/kind#post"/>
+#     <category scheme="http://www.blogger.com/atom/ns#" term="toc:3dr-radio"/>
+#     <link rel="alternate" type="text/html"
+#           href="http://eastbay-rc.blogspot.com/2012/04/blah.html"
+#           title="Strain Relief Carrier for 3DR Ground Module"/>
+# </entry>
+##
+# draft
+# page
+#-----------------------------------------------------------------------
+
+import sys
+import collections
+from xml.dom.minidom import parseString
+
+#-----------------------------------------------------------------------
+def ispost(e):
+    """is this a blog post? it is if it is a post category. extract keywords"""
+
+    isp=False
+    cats={}
+    toc_list=[]
+    idx_list=[]
+    term_list=[]
+
+    categories = e.getElementsByTagName('category')
+    for c in categories:
+        if c.hasAttribute('scheme') and c.hasAttribute('term'):
+            scheme_v=c.attributes['scheme'].nodeValue
+            term_v=c.attributes['term'].nodeValue
+            if scheme_v.endswith('#kind') and term_v.endswith('#post'):
+                isp=True
+            if scheme_v.endswith('/ns#'):
+                term_list.append(term_v)
+                if term_v.startswith('toc:'):
+                    toc_list.append(term_v[4:])
+                if term_v.startswith('idx:'):
+                    idx_list.append(term_v[4:])
+
+    if isp:
+        rv=(term_list,toc_list,idx_list)
+    else:
+        rv=False
+    return rv
+
+#-----------------------------------------------------------------------
+def get_href(elist):
+    """get the canonical external url for this entry"""
+    alink='--NadaLink--'
+    for e in elist:
+        if e.hasAttribute('rel') and \
+           e.attributes['rel'].nodeValue == 'alternate':
+            alink=e.attributes['href'].nodeValue
+    return alink
+
+masteridx=collections.defaultdict(list)
+
+#-----------------------------------------------------------------------
+def do1(e):
+    """process one entry"""
+    global masteridx
+
+    if e.hasAttribute('app:control'):
+        return
+
+    title = e.getElementsByTagName('title')[0]
+    links = e.getElementsByTagName('link')
+
+    rc=ispost(e)
+    if rc:
+        if title.firstChild:
+            titletext=title.firstChild.data
+        else:
+            titletext='--NadaTitleText--'
+
+        hreftext=get_href(links)
+
+        if 0:
+            print '-----'
+            print titletext
+            print hreftext
+            print rc
+
+        allidx=rc[0]
+        for i in allidx:
+            masteridx[i].append([titletext,hreftext])
+
+#-----------------------------------------------------------------------
+def gen_masteridx(ofd=sys.stdin):
+    """generate a master index of all tags"""
+    masterkeys=masteridx.keys()
+    masterkeys.sort()
+    print >>ofd,'<DL>'
+    for i in masterkeys:
+        print >>ofd,'<DT><STRONG>%s</STRONG></DT>'%(i)
+        for j in masteridx[i]:
+            print >>ofd,'<DD><A HREF="%s">%s</A><BR/></DD>'%(j[1],j[0])
+    print >>ofd,'</DL>'
+
+#-----------------------------------------------------------------------
+def gen_toc():
+    """generate a table of contents"""
+    pass
+
+#-----------------------------------------------------------------------
+def gen_idx():
+    """generate a selective index (necessary???)"""
+    pass
+
+#-----------------------------------------------------------------------
+def main():
+    """the main thing"""
+    fn=sys.argv[1]
+    ifd=open('blog-08-06-2012.xml')
+    data=ifd.read()
+    dom = parseString(data)
+
+    entries = dom.getElementsByTagName('entry')
+    for e in entries:
+        do1(e)
+
+    # master index
+    ofd=open('masteridx.html','w')
+    gen_masteridx(ofd)
+    ofd.close()
+
+#-----------------------------------------------------------------------
+main()
