@@ -1,0 +1,5 @@
+. CONFIG
+
+curl -v \
+    -H "Authorization: GoogleLogin auth=$G_AUTH_TOKEN" \
+    http://www.blogger.com/feeds/$FEED/archive

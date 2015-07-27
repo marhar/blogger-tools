@@ -1,0 +1,10 @@
+. CONFIG
+
+G_AUTH_TOKEN=`curl 2>/dev/null https://www.google.com/accounts/ClientLogin \
+    -d Email=$GMAIL \
+    -d Passwd=$GDATA_PASSWORD  \
+    -d accountType=GOOGLE \
+    -d source=curlExample \
+    -d service=blogger \
+  | grep '^Auth=' | cut -c 6-`
+export G_AUTH_TOKEN

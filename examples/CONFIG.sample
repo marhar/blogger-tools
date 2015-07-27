@@ -1,0 +1,9 @@
+FEED=1234567890
+GMAIL=yourname@gmail.com
+GPASS=yourpass
+
+# or, read passwd interactively
+# echo google passwd:
+# stty -echo
+# read GPASS
+# stty echo

@@ -1,0 +1,15 @@
+#!/bin/sh
+
+. CONFIG
+
+AUTH=`curl 2>/dev/null https://www.google.com/accounts/ClientLogin \
+    -d Email=$GMAIL \
+    -d Passwd=$GPASS  \
+    -d accountType=GOOGLE \
+    -d source=blogix \
+    -d service=blogger \
+  | grep '^Auth=' | cut -c 6-`
+
+curl -v --request POST -H "Content-Type: application/atom+xml" \
+    -H "Authorization: GoogleLogin auth=$AUTH" \
+    "http://www.blogger.com/feeds/$FEED/pages/default" --data "@blog_post.xml"

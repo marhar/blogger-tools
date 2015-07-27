@@ -1,0 +1,16 @@
+. CONFIG
+
+echo -n google passwd:
+stty -echo
+read GPASS
+stty echo
+
+AUTH=`curl 2>/dev/null https://www.google.com/accounts/ClientLogin \
+    -d Email=$GMAIL \
+    -d Passwd=$GPASS  \
+    -d accountType=GOOGLE \
+    -d source=blogix \
+    -d service=blogger \
+  | grep '^Auth=' | cut -c 6-`
+
+echo $AUTH

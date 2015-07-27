@@ -1,0 +1,18 @@
+#!/bin/sh
+
+set -x
+
+. CONFIG
+
+AUTH=`curl 2>/dev/null https://www.google.com/accounts/ClientLogin \
+    -d Email=$GMAIL \
+    -d Passwd=$GPASS  \
+    -d accountType=GOOGLE \
+    -d source=blogix \
+    -d service=blogger \
+  | grep '^Auth=' | cut -c 6-`
+
+curl \
+    -H "Authorization: GoogleLogin auth=$AUTH" \
+    https://www.googleapis.com/blogger/v3/blogs/$FEED/pages
+
