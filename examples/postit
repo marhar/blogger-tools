@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. CONFIG
+. $HOME/.blogixrc
 
 AUTH=`curl 2>/dev/null https://www.google.com/accounts/ClientLogin \
     -d Email=$GMAIL \

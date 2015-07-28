@@ -1,8 +1,6 @@
 #!/bin/sh
 
-set -x
-
-. CONFIG
+. $HOME/.blogixrc
 
 AUTH=`curl 2>/dev/null https://www.google.com/accounts/ClientLogin \
     -d Email=$GMAIL \
@@ -15,4 +13,3 @@ AUTH=`curl 2>/dev/null https://www.google.com/accounts/ClientLogin \
 curl \
     -H "Authorization: GoogleLogin auth=$AUTH" \
     https://www.googleapis.com/blogger/v3/blogs/$FEED/pages
-

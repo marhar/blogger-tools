@@ -1,9 +1,4 @@
-. CONFIG
-
-echo -n google passwd:
-stty -echo
-read GPASS
-stty echo
+. $HOME/.blogixrc
 
 AUTH=`curl 2>/dev/null https://www.google.com/accounts/ClientLogin \
     -d Email=$GMAIL \
@@ -14,3 +9,4 @@ AUTH=`curl 2>/dev/null https://www.google.com/accounts/ClientLogin \
   | grep '^Auth=' | cut -c 6-`
 
 echo $AUTH
+

@@ -1,4 +1,4 @@
-. CONFIG
+. $HOME/.blogixrc
 
 G_AUTH_TOKEN=`curl 2>/dev/null https://www.google.com/accounts/ClientLogin \
     -d Email=$GMAIL \

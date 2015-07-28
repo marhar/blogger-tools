@@ -1,4 +1,4 @@
-. CONFIG
+. $HOME/.blogixrc
 
 curl -v \
     -H "Authorization: GoogleLogin auth=$G_AUTH_TOKEN" \
